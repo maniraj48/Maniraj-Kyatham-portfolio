@@ -67,6 +67,24 @@
     color: #E8E4DE;
   }
 
+  /* Custom Animated Cursor: Hide system cursor completely on devices with pointer capability */
+  html.custom-cursor-enabled,
+  html.custom-cursor-enabled *,
+  html.custom-cursor-enabled *::before,
+  html.custom-cursor-enabled *::after {
+    cursor: none !important;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html,
+    body,
+    *,
+    *::before,
+    *::after {
+      cursor: none !important;
+    }
+  }
+
   ::selection {
     color: #ffffff;
     background-color: #C45D3E;
