@@ -121,9 +121,9 @@ CERTIFICATIONS
   };
 
   return (
-    <section className="w-full py-16 sm:py-20 bg-[#0A0A0C] border-t border-b border-white/10 relative overflow-hidden">
+    <section className="w-full py-10 sm:py-12 bg-[#0A0A0C] border-t border-b border-white/10 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 md:px-12 lg:px-16">
-        <div className="rounded-2xl sm:rounded-3xl bg-[#141516] border border-white/15 p-8 sm:p-12 md:p-16 flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative">
+        <div className="rounded-2xl sm:rounded-3xl bg-[#141516] border border-white/15 p-6 sm:p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative">
           <div>
             <span className="font-mono text-xs uppercase tracking-[0.24em] text-accent block mb-2">
               DOCUMENTATION

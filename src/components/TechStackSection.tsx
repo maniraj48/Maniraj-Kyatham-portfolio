@@ -47,7 +47,7 @@ export const TechStackSection: React.FC = () => {
   return (
     <section
       id="tech-stack"
-      className="relative w-full bg-[#0A0A0C] text-[#E8E4DE] py-20 sm:py-24 md:py-32 overflow-hidden border-b border-white/10"
+      className="relative w-full bg-[#0A0A0C] text-[#E8E4DE] py-10 sm:py-12 md:py-16 overflow-hidden border-b border-white/10"
     >
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -57,7 +57,7 @@ export const TechStackSection: React.FC = () => {
         className="max-w-7xl mx-auto px-5 sm:px-8 md:px-12 lg:px-16"
       >
         {/* Section Header */}
-        <div className="mb-12 sm:mb-16">
+        <div className="mb-6 sm:mb-8">
           <span className="font-mono text-xs uppercase tracking-[0.24em] text-accent block mb-3">
             04 / STACK
           </span>
@@ -67,14 +67,14 @@ export const TechStackSection: React.FC = () => {
 */}
             TECHNICAL SKILLS
           </h2>
-          <div className="h-[2px] w-16 bg-accent mt-3 mb-6" />
+          <div className="h-[2px] w-16 bg-accent mt-2.5 mb-4" />
           <p className="text-base sm:text-lg text-[#9E988F] font-sans max-w-2xl leading-relaxed">
             Categorized technical capabilities across software development, backend systems, database architecture, machine learning, and core computer science fundamentals.
           </p>
         </div>
 
         {/* Interactive Category Tabs */}
-        <div className="mb-10 sm:mb-12 flex flex-wrap gap-2 sm:gap-2.5">
+        <div className="mb-6 sm:mb-8 flex flex-wrap gap-2 sm:gap-2.5">
           {categories.map((cat) => {
             const isSelected = activeCategory === cat;
             return (

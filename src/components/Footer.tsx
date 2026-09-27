@@ -10,7 +10,7 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="w-full bg-[#070709] border-t border-white/10 py-12 px-5 sm:px-8 md:px-12 lg:px-16 text-[#8A8275] font-mono text-xs">
+    <footer className="w-full bg-[#070709] border-t border-white/10 py-8 sm:py-10 px-5 sm:px-8 md:px-12 lg:px-16 text-[#8A8275] font-mono text-xs">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         
         {/* Brand & Role */}

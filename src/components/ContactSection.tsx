@@ -130,12 +130,12 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
   return (
     <section
       id="contact"
-      className="relative w-full bg-[#0A0A0C] text-[#E8E4DE] py-20 sm:py-28 md:py-36 overflow-hidden border-b border-white/10"
+      className="relative w-full bg-[#0A0A0C] text-[#E8E4DE] py-10 sm:py-12 md:py-16 overflow-hidden border-b border-white/10"
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-8 md:px-12 lg:px-16">
         
         {/* Large Reference-Style Contact Heading (Section 16) */}
-        <div className="mb-14 sm:mb-20">
+        <div className="mb-8 sm:mb-10">
           <span className="font-mono text-xs uppercase tracking-[0.24em] text-accent block mb-3">
             05 / CONTACT
           </span>
@@ -148,7 +148,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
             SOMETHING<br />
             <span className="serif-accent normal-case italic font-normal text-cream/90">useful.</span>
           </h2>
-          <div className="h-[2px] w-20 bg-accent mt-4 mb-6" />
+          <div className="h-[2px] w-20 bg-accent mt-3 mb-4" />
           <p className="text-base sm:text-xl text-[#9E988F] font-sans max-w-3xl leading-relaxed">
             Interested in software development, backend engineering, AI/ML, or building practical systems? Let's connect.
           </p>

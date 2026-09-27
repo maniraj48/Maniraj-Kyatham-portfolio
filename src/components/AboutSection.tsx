@@ -7,7 +7,7 @@ export const AboutSection: React.FC = () => {
   return (
     <section
       id="about"
-      className="relative w-full bg-[#0A0A0C] text-[#E8E4DE] py-20 sm:py-24 md:py-32 overflow-hidden border-b border-white/10"
+      className="relative w-full bg-[#0A0A0C] text-[#E8E4DE] py-10 sm:py-12 md:py-16 overflow-hidden border-b border-white/10"
     >
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -17,7 +17,7 @@ export const AboutSection: React.FC = () => {
         className="max-w-7xl mx-auto px-5 sm:px-8 md:px-12 lg:px-16"
       >
         {/* Section Header */}
-        <div className="mb-12 sm:mb-16">
+        <div className="mb-6 sm:mb-8">
           <span className="font-mono text-xs uppercase tracking-[0.24em] text-accent block mb-3">
             01 / ABOUT
           </span>
@@ -35,7 +35,7 @@ export const AboutSection: React.FC = () => {
         <div className="grid lg:grid-cols-12 gap-8 lg:gap-14 items-start">
           
           {/* Main Prose (7 cols) */}
-          <div className="lg:col-span-7 space-y-6 sm:space-y-8">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-6">
             <p className="text-xl sm:text-2xl md:text-3xl font-sans text-cream/95 leading-relaxed tracking-tight">
               I am a final-year <strong className="text-cream font-semibold">B.Tech Information Technology</strong> student at <strong className="text-cream font-semibold">ACE Engineering College</strong> in Hyderabad (CGPA 8.36).
             </p>

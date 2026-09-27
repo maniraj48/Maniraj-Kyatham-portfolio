@@ -21,12 +21,12 @@ export const Projects: React.FC<ProjectsProps> = ({ onShowToast }) => {
   return (
     <section
       id="projects"
-      className="relative w-full bg-[#0A0A0C] text-[#E8E4DE] py-20 sm:py-24 md:py-32 overflow-hidden border-b border-white/10"
+      className="relative w-full bg-[#0A0A0C] text-[#E8E4DE] py-10 sm:py-12 md:py-16 overflow-hidden border-b border-white/10"
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-8 md:px-12 lg:px-16">
         
         {/* Section Header */}
-        <div className="mb-14 sm:mb-20">
+        <div className="mb-8 sm:mb-10">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
             <span className="font-mono text-xs uppercase tracking-[0.24em] text-accent">
               02 / SELECTED WORK
@@ -41,7 +41,7 @@ export const Projects: React.FC<ProjectsProps> = ({ onShowToast }) => {
           <h2 className="font-display font-black text-3xl sm:text-5xl md:text-6xl text-cream tracking-tight uppercase">
 */}            SELECTED WORK
           </h2>
-          <div className="h-[2px] w-16 bg-accent mt-3 mb-6" />
+          <div className="h-[2px] w-16 bg-accent mt-2.5 mb-4" />
 
           <p className="text-base sm:text-lg text-[#9E988F] font-sans max-w-2xl leading-relaxed">
             Full-stack systems and offline document intelligence applications built with FastAPI, Flask, SQLite, Scikit-Learn, and ChromaDB.
@@ -49,7 +49,7 @@ export const Projects: React.FC<ProjectsProps> = ({ onShowToast }) => {
         </div>
 
         {/* Large Editorial Technical Project Panels */}
-        <div className="space-y-16 sm:space-y-24">
+        <div className="space-y-8 sm:space-y-12">
           {PROJECTS.map((project) => {
             const isFirst = project.projectNumber === '01';
 

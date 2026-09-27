@@ -19,7 +19,7 @@ export const Hero: React.FC<HeroProps> = () => {
   return (
     <section
       id="hero"
-      className="relative min-h-[100dvh] pt-28 pb-16 md:pt-36 md:pb-24 px-5 sm:px-8 md:px-12 lg:px-16 flex items-center justify-center overflow-hidden bg-[#0A0A0C]"
+      className="relative min-h-[85vh] lg:min-h-[90vh] pt-24 pb-12 md:pt-28 md:pb-14 px-5 sm:px-8 md:px-12 lg:px-16 flex items-center justify-center overflow-hidden bg-[#0A0A0C]"
     >
       {/* Subtle Background Structural Grid Lines */}
       <div

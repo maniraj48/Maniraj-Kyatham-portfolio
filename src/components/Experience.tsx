@@ -7,7 +7,7 @@ export const Experience: React.FC = () => {
   return (
     <section
       id="experience"
-      className="relative w-full bg-[#0A0A0C] text-[#E8E4DE] py-20 sm:py-24 md:py-32 overflow-hidden border-b border-white/10"
+      className="relative w-full bg-[#0A0A0C] text-[#E8E4DE] py-10 sm:py-12 md:py-16 overflow-hidden border-b border-white/10"
     >
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -17,7 +17,7 @@ export const Experience: React.FC = () => {
         className="max-w-7xl mx-auto px-5 sm:px-8 md:px-12 lg:px-16"
       >
         {/* Section Header */}
-        <div className="mb-14 sm:mb-20">
+        <div className="mb-8 sm:mb-10">
           <span className="font-mono text-xs uppercase tracking-[0.24em] text-accent block mb-3">
             03 / EXPERIENCE
           </span>
@@ -29,14 +29,14 @@ export const Experience: React.FC = () => {
             EXPERIENCE
           </h2>
           
-          <div className="h-[2px] w-16 bg-accent mt-3 mb-6" />
+          <div className="h-[2px] w-16 bg-accent mt-2.5 mb-4" />
           <p className="text-base sm:text-lg text-[#9E988F] font-sans max-w-2xl leading-relaxed">
             Professional industry internship experience, formal academic training, and verified technical credentials.
           </p>
         </div>
 
         {/* Sophisticated Timeline Entry */}
-        <div className="space-y-12">
+        <div className="space-y-6 sm:space-y-8">
           {EXPERIENCES.map((exp) => (
             <div
               key={exp.id}
@@ -108,7 +108,7 @@ export const Experience: React.FC = () => {
         </div>
 
         {/* Education & Certifications Grid (Prompt Sections 23 & 24) */}
-        <div className="grid lg:grid-cols-12 gap-8 mt-16 sm:mt-24 pt-12 border-t border-white/10">
+        <div className="grid lg:grid-cols-12 gap-8 mt-8 sm:mt-10 pt-8 border-t border-white/10">
           
           {/* Compact Education Section (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
