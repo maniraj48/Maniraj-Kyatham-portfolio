@@ -44,6 +44,15 @@ export const Footer: React.FC = () => {
           </a>
           <span>·</span>
           <a
+            href={PERSONAL_INFO.medium}
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-accent transition-colors"
+          >
+            Medium
+          </a>
+          <span>·</span>
+          <a
             href={PERSONAL_INFO.x}
             target="_blank"
             rel="noreferrer"

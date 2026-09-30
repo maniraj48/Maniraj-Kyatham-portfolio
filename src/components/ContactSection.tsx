@@ -137,7 +137,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
         {/* Large Reference-Style Contact Heading (Section 16) */}
         <div className="mb-8 sm:mb-10">
           <span className="font-mono text-xs uppercase tracking-[0.24em] text-accent block mb-3">
-            05 / CONTACT
+            06 / CONTACT
           </span>
           
           {/* <h2 className="font-display font-black text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-cream tracking-tight uppercase leading-[0.92]">
@@ -281,6 +281,17 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
                 >
                   <Linkedin className="w-4 h-4 text-accent" />
                   <span>LinkedIn</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-[#8A8275]" />
+                </a>
+
+                <a
+                  href={PERSONAL_INFO.medium}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface border border-white/10 text-xs font-mono text-cream hover:border-accent hover:text-white transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4 text-accent" />
+                  <span>Medium</span>
                   <ArrowUpRight className="w-3.5 h-3.5 text-[#8A8275]" />
                 </a>
 

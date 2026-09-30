@@ -1,4 +1,4 @@
-import { Project, Experience, SkillGroup, Education, Certification } from '../types';
+import { Project, Experience, SkillGroup, Education, Certification, Article } from '../types';
 
 export const PERSONAL_INFO = {
   name: 'Maniraj Kyatham',
@@ -16,6 +16,7 @@ export const PERSONAL_INFO = {
   phone: '+91 99494 47302',
   linkedin: 'https://linkedin.com/in/maniraj-kyatham',
   github: 'https://github.com/maniraj48',
+  medium: 'https://medium.com/@manirajkyatham',
   x: 'https://x.com/manirajk08',
   xHandle: '@manirajk08',
   photoUrl: '/maniraj-portrait.jpg'
@@ -342,5 +343,44 @@ export const CERTIFICATIONS: Certification[] = [
     title: 'TCS iON Career Edge – Young Professional',
     issuer: 'TCS iON',
     year: '2024'
+  }
+];
+
+export const ARTICLES: Article[] = [
+  {
+    id: 'http-without-headache',
+    articleNumber: '01',
+    title: 'HTTP, Without the Headache: A Beginner’s Guide to Web Communication',
+    shortDescription:
+      'A beginner-friendly explanation of HTTP requests, responses, methods, status codes, headers, request bodies, HTTPS, stateless communication, and how browsers and servers communicate.',
+    date: 'August 28, 2026',
+    readTime: '7 min read',
+    tags: ['HTTP Request', 'Web Development', 'Backend Development'],
+    url: 'https://medium.com/@manirajkyatham/http-without-the-headache-a-beginners-guide-to-web-communication-627cc6429ae3',
+    imageUrl: '/images/article_http_guide.jpg'
+  },
+  {
+    id: 'frontend-vs-backend',
+    articleNumber: '02',
+    title: 'Frontend vs. Backend: The Beginner’s Guide to the Web’s Great Divide',
+    shortDescription:
+      'An explanation of how frontend, backend, APIs, and databases work together to form a modern web application.',
+    date: 'August 19, 2026',
+    readTime: '7 min read',
+    tags: ['Web Development', 'Backend', 'Database'],
+    url: 'https://medium.com/@manirajkyatham/frontend-vs-backend-the-beginners-guide-to-the-web-s-great-divide-7be6be44a76f',
+    imageUrl: '/images/article_frontend_backend.jpg'
+  },
+  {
+    id: 'how-website-actually-works',
+    articleNumber: '03',
+    title: 'How a Website Actually Works: From URL to Web Page',
+    shortDescription:
+      'A step-by-step breakdown of what happens when you type a URL into a browser — from DNS lookup and TCP handshakes to server request processing and browser rendering.',
+    date: 'August 13, 2026',
+    readTime: '6 min read',
+    tags: ['Web Development', 'Networking', 'Architecture'],
+    url: 'https://medium.com/@manirajkyatham/how-a-website-actually-works-from-url-to-web-page-426429ae6e09',
+    imageUrl: '/images/article_website_works.jpg'
   }
 ];

@@ -73,3 +73,15 @@ export interface ChatMessage {
   timestamp: string;
   isOffline?: boolean;
 }
+
+export interface Article {
+  id: string;
+  articleNumber: string;
+  title: string;
+  shortDescription: string;
+  date: string;
+  readTime: string;
+  tags: string[];
+  url: string;
+  imageUrl: string;
+}

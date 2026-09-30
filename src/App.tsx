@@ -8,6 +8,7 @@ import { Projects } from './components/Projects';
 import { Experience } from './components/Experience';
 import { TechStackSection } from './components/TechStackSection';
 import { ResumeSection } from './components/ResumeSection';
+import { WritingSection } from './components/WritingSection';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { AIAssistantModal } from './components/AIAssistantModal';
@@ -65,7 +66,7 @@ export default function App() {
 
   // Non-blocking IntersectionObserver for active section tracking (zero layout thrashing)
   useEffect(() => {
-    const sections = ['hero', 'about', 'projects', 'experience', 'tech-stack', 'contact'];
+    const sections = ['hero', 'about', 'projects', 'experience', 'tech-stack', 'writing', 'contact'];
     const elements = sections
       .map((id) => document.getElementById(id))
       .filter(Boolean) as HTMLElement[];
@@ -154,7 +155,10 @@ export default function App() {
         {/* Documentation: Full Resume Modal & Download */}
         <ResumeSection onShowToast={addToast} />
 
-        {/* 05 / CONTACT: LET'S BUILD SOMETHING USEFUL. */}
+        {/* 05 / WRITING: THINGS I'VE BEEN WRITING. */}
+        <WritingSection />
+
+        {/* 06 / CONTACT: LET'S BUILD SOMETHING USEFUL. */}
         <ContactSection onShowToast={addToast} />
       </main>
 

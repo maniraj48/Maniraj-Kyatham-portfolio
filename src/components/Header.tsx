@@ -54,6 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
     { name: 'Work', href: '#projects', id: 'projects' },
     { name: 'Experience', href: '#experience', id: 'experience' },
     { name: 'Skills', href: '#tech-stack', id: 'tech-stack' },
+    { name: 'Writing', href: '#writing', id: 'writing' },
     { name: 'Contact', href: '#contact', id: 'contact' }
   ];
 
@@ -253,6 +254,15 @@ export const Header: React.FC<HeaderProps> = ({
                   className="hover:text-cream"
                 >
                   LinkedIn
+                </a>
+                <span>·</span>
+                <a
+                  href={PERSONAL_INFO.medium}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-cream"
+                >
+                  Medium
                 </a>
                 <span>·</span>
                 <a
