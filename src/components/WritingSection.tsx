@@ -24,12 +24,9 @@ export const WritingSection: React.FC = () => {
               05 / WRITING
             </span>
           <h2 className="font-display font-black text-2xl sm:text-4xl md:text-5xl text-cream tracking-tight uppercase">
-{/*
-            <h2 className="font-display font-black text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-cream tracking-tight uppercase leading-[0.94]">
-*/}
-              THINGS I'VE<br />
-              BEEN WRITING.
-            </h2>
+            THINGS I'VE<br />
+            BEEN WRITING.
+          </h2>
             <div className="h-[2px] w-16 sm:w-20 bg-accent mt-3 mb-4" />
             <p className="text-base sm:text-lg text-[#9E988F] font-sans max-w-2xl leading-relaxed">
               Technical notes and beginner-friendly explanations about web development, backend systems, APIs, and software fundamentals.
@@ -80,12 +77,33 @@ export const WritingSection: React.FC = () => {
 
                   {/* Middle Column: Title, Description, Tags & Read Details */}
                   <div className="lg:col-span-7 space-y-3.5">
-                    {/* Large Title */}
-                    <h3 className="font-display font-black text-xl sm:text-2xl md:text-3xl text-cream tracking-tight uppercase leading-snug group-hover:text-white transition-colors">
-                      <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
-                        {article.title}
-                      </span>
-                    </h3>
+                    {/* Editorial Article Title */}
+                    {(() => {
+                      const colonIdx = article.title.indexOf(':');
+                      if (colonIdx !== -1) {
+                        const mainTitle = article.title.slice(0, colonIdx);
+                        const subtitle = article.title.slice(colonIdx + 1).trim();
+                        return (
+                          <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-[1.85rem] text-cream leading-tight transition-colors">
+                            <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
+                              <span className="font-serif font-normal text-cream group-hover:text-accent transition-colors block leading-[1.18] tracking-tight">
+                                {mainTitle}
+                              </span>
+                              <span className="font-serif italic text-base sm:text-lg md:text-xl text-[#B8B2A7] block mt-1 leading-snug group-hover:text-cream/90 transition-colors">
+                                {subtitle}
+                              </span>
+                            </span>
+                          </h3>
+                        );
+                      }
+                      return (
+                        <h3 className="font-serif font-normal text-2xl sm:text-3xl md:text-4xl text-cream tracking-tight leading-[1.2] group-hover:text-accent transition-colors">
+                          <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
+                            {article.title}
+                          </span>
+                        </h3>
+                      );
+                    })()}
 
                     {/* Short Description */}
                     <p className="text-sm sm:text-base text-[#9E988F] font-sans leading-relaxed group-hover:text-cream/80 transition-colors">

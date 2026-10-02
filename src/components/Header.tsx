@@ -61,8 +61,21 @@ export const Header: React.FC<HeaderProps> = ({
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     sounds.playClick();
+
+    // 1. Immediately unlock scroll locks so viewport can move
+    unlockScroll('mobile-menu');
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = '';
+      document.documentElement.classList.remove('lenis-stopped');
+    }
+
+    // 2. Dismiss mobile drawer
     setMenuOpen(false);
-    smoothScrollTo(href);
+
+    // 3. Smoothly navigate with navbar height offset
+    setTimeout(() => {
+      smoothScrollTo(href, -75);
+    }, 60);
   };
 
   return (
@@ -82,7 +95,15 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={(e) => {
               e.preventDefault();
               sounds.playClick();
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+              unlockScroll('mobile-menu');
+              if (typeof document !== 'undefined') {
+                document.body.style.overflow = '';
+                document.documentElement.classList.remove('lenis-stopped');
+              }
+              setMenuOpen(false);
+              setTimeout(() => {
+                smoothScrollTo(0, 0);
+              }, 50);
             }}
             className="group inline-flex items-center gap-2 cursor-pointer select-none text-cream"
             aria-label="Maniraj Kyatham Home"
@@ -191,8 +212,8 @@ export const Header: React.FC<HeaderProps> = ({
             data-lenis-prevent="true"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.25 }}
+            exit={{ opacity: 0, y: -15, pointerEvents: 'none' }}
+            transition={{ duration: 0.18 }}
             className="fixed inset-0 z-[9980] bg-[#0A0A0C] text-[#E8E4DE] flex flex-col justify-between p-6 sm:p-10 lg:hidden overflow-y-auto overscroll-contain touch-pan-y"
           >
             {/* Top drawer bar */}
@@ -202,8 +223,16 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
               <button
                 type="button"
-                onClick={() => setMenuOpen(false)}
-                className="w-10 h-10 rounded-full bg-surface border border-white/10 flex items-center justify-center text-cream"
+                onClick={() => {
+                  sounds.playClick();
+                  unlockScroll('mobile-menu');
+                  if (typeof document !== 'undefined') {
+                    document.body.style.overflow = '';
+                    document.documentElement.classList.remove('lenis-stopped');
+                  }
+                  setMenuOpen(false);
+                }}
+                className="w-10 h-10 rounded-full bg-surface border border-white/10 flex items-center justify-center text-cream cursor-pointer active:scale-95"
                 aria-label="Close menu"
               >
                 ✕

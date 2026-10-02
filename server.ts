@@ -197,6 +197,41 @@ async function startServer() {
     }
   });
 
+  // Serve public static assets with priority (PDFs, images, fonts)
+  const publicDir = path.join(currentDir, 'public');
+  app.use(express.static(publicDir));
+
+  // Dedicated explicit routes for authentic resume PDF
+  app.get('/Maniraj_Kyatham_Resume.pdf', (req, res) => {
+    const pdfPath = path.join(publicDir, 'Maniraj_Kyatham_Resume.pdf');
+    if (fs.existsSync(pdfPath)) {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'inline; filename="Maniraj_Kyatham_Resume.pdf"');
+      return res.sendFile(pdfPath);
+    }
+    return res.status(404).send('PDF not found');
+  });
+
+  app.get('/api/resume/download', (req, res) => {
+    const pdfPath = path.join(publicDir, 'Maniraj_Kyatham_Resume.pdf');
+    if (fs.existsSync(pdfPath)) {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename="Maniraj_Kyatham_Resume.pdf"');
+      return res.sendFile(pdfPath);
+    }
+    return res.status(404).json({ error: 'Resume PDF not found' });
+  });
+
+  app.get('/api/resume/view', (req, res) => {
+    const pdfPath = path.join(publicDir, 'Maniraj_Kyatham_Resume.pdf');
+    if (fs.existsSync(pdfPath)) {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'inline; filename="Maniraj_Kyatham_Resume.pdf"');
+      return res.sendFile(pdfPath);
+    }
+    return res.status(404).json({ error: 'Resume PDF not found' });
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
     const { createServer: createViteServer } = await import('vite');
