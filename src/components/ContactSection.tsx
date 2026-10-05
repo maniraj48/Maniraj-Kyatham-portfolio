@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { sounds } from '../utils/soundEffects';
-import { Mail, Phone, MapPin, Github, Linkedin, Copy, Check, Send, ArrowUpRight, CheckCircle2, RotateCcw, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MapPin, Github, Linkedin, Copy, Check, Send, ArrowUpRight, CheckCircle2, AlertCircle, ExternalLink } from 'lucide-react';
 import { XIcon } from './icons/XIcon';
 
 interface ContactSectionProps {
@@ -13,23 +12,17 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [copiedX, setCopiedX] = useState(false);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     subject: '',
     message: ''
   });
+
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [submissionData, setSubmissionData] = useState<{
-    name: string;
-    email: string;
-    subject: string;
-    message: string;
-    needsActivation?: boolean;
-    forwarded?: boolean;
-    note?: string;
-  } | null>(null);
+  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [statusMessage, setStatusMessage] = useState('');
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(PERSONAL_INFO.email);
@@ -55,124 +48,94 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
     setTimeout(() => setCopiedX(false), 2000);
   };
 
-  const getGmailComposeUrl = (subject: string, body: string) => {
-    return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(PERSONAL_INFO.email)}&su=${encodeURIComponent(subject || 'Portfolio Inquiry')}&body=${encodeURIComponent(body)}`;
-  };
-
-  const getMailtoUrl = (subject: string, body: string) => {
-    return `mailto:${encodeURIComponent(PERSONAL_INFO.email)}?subject=${encodeURIComponent(subject || 'Portfolio Inquiry')}&body=${encodeURIComponent(body)}`;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
+    // 1. Prevent native page navigation/reload
     e.preventDefault();
-    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+    setStatus('idle');
+    setStatusMessage('');
+
+    // 2. Client-side field validation
+    const trimmedName = formData.name.trim();
+    const trimmedEmail = formData.email.trim();
+    const trimmedSubject = formData.subject.trim();
+    const trimmedMessage = formData.message.trim();
+
+    if (!trimmedName) {
       sounds.playError();
-      onShowToast('Please complete all required fields.', 'error');
+      setStatus('error');
+      setStatusMessage('Unable to send your message. Please enter your name.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      sounds.playError();
+      setStatus('error');
+      setStatusMessage('Unable to send your message. Please provide a valid email address.');
+      return;
+    }
+
+    if (!trimmedMessage || trimmedMessage.length < 5) {
+      sounds.playError();
+      setStatus('error');
+      setStatusMessage('Unable to send your message. Please enter a message (at least 5 characters).');
       return;
     }
 
     setSubmitting(true);
     sounds.playClick();
 
-    const currentData = { ...formData };
-    const recipient = PERSONAL_INFO.email;
-
-    let resJson: any = null;
-    let reachedApi = false;
-
-    // 1. Try local or Vercel serverless /api/contact route
     try {
-      const response = await fetch('/api/contact', {
+      // 3. Asynchronous client-side FormSubmit AJAX request
+      const response = await fetch('https://formsubmit.co/ajax/manirajkyatham@gmail.com', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentData)
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name: trimmedName,
+          email: trimmedEmail,
+          _subject: trimmedSubject ? `[Portfolio] ${trimmedSubject}` : `Portfolio Message from ${trimmedName}`,
+          subject: trimmedSubject || 'Portfolio Message',
+          message: trimmedMessage,
+          _template: 'table',
+          _captcha: 'false'
+        })
       });
 
-      const contentType = response.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        resJson = await response.json();
-        reachedApi = true;
-      }
-    } catch (apiErr) {
-      console.warn('API endpoint unreachable, trying direct browser gateway:', apiErr);
-    }
-
-    // 2. If /api/contact is unavailable (e.g. static CDN on Vercel), dispatch directly to FormSubmit from browser
-    if (!reachedApi || !resJson) {
+      const responseText = await response.text();
+      let resData: any = null;
       try {
-        const formSubmitRes = await fetch(`https://formsubmit.co/ajax/${recipient}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            name: currentData.name,
-            email: currentData.email,
-            _replyto: currentData.email,
-            _subject: `[Portfolio Inquiry] ${currentData.subject || 'New Contact'} (from ${currentData.name})`,
-            subject: currentData.subject || 'Portfolio Inquiry',
-            message: currentData.message,
-            _template: 'table',
-            _captcha: 'false'
-          })
-        });
-
-        resJson = await formSubmitRes.json().catch(() => null);
-      } catch (directErr) {
-        console.error('Direct gateway error:', directErr);
+        resData = JSON.parse(responseText);
+      } catch {
+        resData = null;
       }
-    }
 
-    // 3. Inspect results accurately
-    const isSuccess = resJson && (resJson.success === 'true' || resJson.success === true || resJson.forwarded === true);
-    const isActivationNeeded = resJson && (
-      resJson.needsActivation === true ||
-      (typeof resJson.message === 'string' && resJson.message.toLowerCase().includes('activation')) ||
-      (typeof resJson.note === 'string' && resJson.note.toLowerCase().includes('activation'))
-    );
+      const isSuccess =
+        response.ok &&
+        (resData?.success === 'true' ||
+          resData?.success === true ||
+          (typeof responseText === 'string' && responseText.includes('"success":"true"')) ||
+          response.status === 200);
 
-    if (isActivationNeeded) {
-      sounds.playSuccess();
-      setSubmissionData({
-        ...currentData,
-        needsActivation: true,
-        forwarded: false,
-        note: 'FormSubmit activation email pending confirmation'
-      });
-      setSubmitted(true);
-      setFormData({ name: '', email: '', subject: '', message: '' });
-      onShowToast('Action required: Please click "Activate Form" in your email inbox.', 'info');
-    } else if (isSuccess) {
-      sounds.playSuccess();
-      setSubmissionData({
-        ...currentData,
-        needsActivation: false,
-        forwarded: true,
-        note: 'Delivered directly to ' + recipient
-      });
-      setSubmitted(true);
-      setFormData({ name: '', email: '', subject: '', message: '' });
-      onShowToast('Message dispatched directly to Maniraj!', 'success');
-    } else {
+      if (isSuccess) {
+        sounds.playSuccess();
+        setStatus('success');
+        setStatusMessage('✓ Message sent successfully.');
+        onShowToast('✓ Message sent successfully.', 'success');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      } else {
+        throw new Error(resData?.message || 'Submission failed');
+      }
+    } catch (err: any) {
       sounds.playError();
-      setSubmissionData({
-        ...currentData,
-        needsActivation: false,
-        forwarded: false,
-        note: 'Gateway pending, direct email client ready'
-      });
-      setSubmitted(true);
-      onShowToast('Ready to send via Gmail or default mail app!', 'info');
+      setStatus('error');
+      setStatusMessage('Unable to send your message. Please try again.');
+      onShowToast('Unable to send your message. Please try again.', 'error');
+    } finally {
+      setSubmitting(false);
     }
-
-    setSubmitting(false);
-  };
-
-  const handleResetForm = () => {
-    sounds.playClick();
-    setSubmitted(false);
-    setSubmissionData(null);
   };
 
   return (
@@ -182,16 +145,13 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-8 md:px-12 lg:px-16">
         
-        {/* Large Reference-Style Contact Heading (Section 16) */}
+        {/* Large Reference-Style Contact Heading */}
         <div className="mb-8 sm:mb-10">
           <span className="font-mono text-xs uppercase tracking-[0.24em] text-accent block mb-3">
             06 / CONTACT
           </span>
           
-          {/* <h2 className="font-display font-black text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-cream tracking-tight uppercase leading-[0.92]">
-          */}
           <h2 className="font-display font-black text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-cream tracking-tight uppercase leading-[0.92]">
-
             LET'S BUILD<br />
             SOMETHING<br />
             <span className="serif-accent normal-case italic font-normal text-cream/90">useful.</span>
@@ -202,7 +162,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
           </p>
         </div>
 
-        {/* Contact Info & Interactive Dispatch Grid */}
+        {/* Contact Info & Form Grid */}
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 items-start">
           
           {/* Direct Communication Channels (5 cols) */}
@@ -358,250 +318,102 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
 
           </div>
 
-          {/* Direct Dispatch Message Form (7 cols) */}
+          {/* FormSubmit AJAX Contact Form (7 cols) */}
           <div className="lg:col-span-7">
             <div className="p-6 sm:p-10 rounded-2xl sm:rounded-3xl bg-[#141516] border border-white/10 shadow-xl">
-              <AnimatePresence mode="wait">
-                {submitted && submissionData ? (
-                  <motion.div
-                    key="submitted-state"
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -15 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-6"
-                  >
-                    {submissionData.forwarded && !submissionData.needsActivation ? (
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-                          <CheckCircle2 className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <span className="font-mono text-xs uppercase tracking-widest text-emerald-400 font-bold block">
-                            MESSAGE DELIVERED
-                          </span>
-                          <h3 className="font-display font-bold text-cream text-lg">
-                            Delivered to Maniraj's Inbox
-                          </h3>
-                        </div>
-                      </div>
-                    ) : submissionData.needsActivation ? (
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                          <Mail className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <span className="font-mono text-xs uppercase tracking-widest text-amber-400 font-bold block">
-                            1-TIME ACTIVATION REQUIRED
-                          </span>
-                          <h3 className="font-display font-bold text-cream text-lg">
-                            Confirmation Link Sent to Your Gmail
-                          </h3>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/30 flex items-center justify-center text-accent shrink-0">
-                          <Mail className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <span className="font-mono text-xs uppercase tracking-widest text-accent font-bold block">
-                            DIRECT EMAIL READY
-                          </span>
-                          <h3 className="font-display font-bold text-cream text-lg">
-                            Send via 1-Click Gmail or Mail
-                          </h3>
-                        </div>
-                      </div>
-                    )}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <span className="font-mono text-xs uppercase tracking-widest text-[#8A8275] block mb-4 font-semibold">
+                  SEND A MESSAGE
+                </span>
 
-                    <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-2 text-xs font-mono">
-                      <div className="text-[#8A8275] flex items-center justify-between">
-                        <span>DESTINATION:</span>
-                        <span className="text-cream select-all">{PERSONAL_INFO.email}</span>
-                      </div>
-                      <div className="text-[#8A8275] flex items-center justify-between">
-                        <span>FROM:</span>
-                        <span className="text-cream select-all">{submissionData.name} ({submissionData.email})</span>
-                      </div>
-                      <div className="text-[#8A8275] flex items-center justify-between">
-                        <span>SUBJECT:</span>
-                        <span className="text-cream truncate max-w-[240px]">{submissionData.subject || 'Portfolio Inquiry'}</span>
-                      </div>
-                    </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-mono text-xs uppercase text-[#8A8275] mb-2">
+                      Your Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      required
+                      placeholder="Name or Organization"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-sm font-sans text-cream placeholder:text-[#8A8275]/50 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent min-h-[44px] transition-colors"
+                    />
+                  </div>
 
-                    {submissionData.needsActivation && (
-                      <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2.5 text-xs">
-                        <div className="flex items-center gap-2 text-amber-400 font-mono font-semibold">
-                          <span>📬 Action Required at {PERSONAL_INFO.email}:</span>
-                        </div>
-                        <div className="text-cream/90 text-xs font-sans leading-relaxed space-y-1.5">
-                          <p>
-                            FormSubmit has sent a 1-time activation confirmation email to <strong className="text-cream">{PERSONAL_INFO.email}</strong>.
-                          </p>
-                          <ol className="list-decimal list-inside space-y-1 text-cream/90 font-medium pl-1">
-                            <li>Open your inbox at <strong className="text-accent">{PERSONAL_INFO.email}</strong></li>
-                            <li>Check for an email from <em>FormSubmit</em> (check Spam/Promotions if not in Primary)</li>
-                            <li>Click the <strong>"Activate Form"</strong> button inside that email</li>
-                          </ol>
-                          <p className="text-[#9E988F] text-[11px] pt-1">
-                            Once activated, all future messages submitted through your portfolio will be pushed straight into your Gmail inbox!
-                          </p>
-                        </div>
-                      </div>
-                    )}
+                  <div>
+                    <label className="block font-mono text-xs uppercase text-[#8A8275] mb-2">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      placeholder="name@domain.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-sm font-sans text-cream placeholder:text-[#8A8275]/50 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent min-h-[44px] transition-colors"
+                    />
+                  </div>
+                </div>
 
-                    <div className="space-y-3 pt-2">
-                      <span className="font-mono text-xs uppercase tracking-widest text-[#8A8275] block">
-                        Direct Email Actions
-                      </span>
-                      <div className="flex flex-wrap gap-3">
-                        <a
-                          href={getGmailComposeUrl(
-                            submissionData.subject,
-                            `Hi Maniraj,\n\n${submissionData.message}\n\n---\nFrom: ${submissionData.name} (${submissionData.email})`
-                          )}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-white/15 text-xs font-mono text-cream hover:border-accent hover:text-white transition-colors cursor-pointer"
-                        >
-                          <Mail className="w-4 h-4 text-accent" />
-                          <span>Open Pre-Filled in Gmail Web</span>
-                          <ExternalLink className="w-3.5 h-3.5 text-[#8A8275]" />
-                        </a>
+                <div>
+                  <label className="block font-mono text-xs uppercase text-[#8A8275] mb-2">
+                    Subject
+                  </label>
+                  <input
+                    type="text"
+                    name="subject"
+                    placeholder="Software Engineering Inquiry / Opportunity"
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-sm font-sans text-cream placeholder:text-[#8A8275]/50 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent min-h-[44px] transition-colors"
+                  />
+                </div>
 
-                        <a
-                          href={getMailtoUrl(
-                            submissionData.subject,
-                            `Hi Maniraj,\n\n${submissionData.message}\n\n---\nFrom: ${submissionData.name} (${submissionData.email})`
-                          )}
-                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-white/15 text-xs font-mono text-cream hover:border-accent hover:text-white transition-colors cursor-pointer"
-                        >
-                          <Mail className="w-4 h-4 text-accent" />
-                          <span>Send via Default Mail App</span>
-                        </a>
+                <div>
+                  <label className="block font-mono text-xs uppercase text-[#8A8275] mb-2">
+                    Message *
+                  </label>
+                  <textarea
+                    rows={4}
+                    name="message"
+                    required
+                    placeholder="Describe your technical inquiry, project requirements, or opportunity..."
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-sm font-sans text-cream placeholder:text-[#8A8275]/50 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent resize-none transition-colors"
+                  />
+                </div>
 
-                        <a
-                          href={PERSONAL_INFO.x}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-white/15 text-xs font-mono text-cream hover:border-accent hover:text-white transition-colors cursor-pointer"
-                        >
-                          <XIcon className="w-4 h-4 text-accent" />
-                          <span>Message on X ({PERSONAL_INFO.xHandle})</span>
-                          <ExternalLink className="w-3.5 h-3.5 text-[#8A8275]" />
-                        </a>
-                      </div>
-                    </div>
-
-                    <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={handleResetForm}
-                        className="inline-flex items-center gap-2 text-xs font-mono text-[#8A8275] hover:text-cream transition-colors cursor-pointer"
-                      >
-                        <RotateCcw className="w-3.5 h-3.5" />
-                        <span>Send another message</span>
-                      </button>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <span className="font-mono text-xs uppercase tracking-widest text-[#8A8275] block mb-4 font-semibold">
-                      SEND A MESSAGE
-                    </span>
-
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block font-mono text-xs uppercase text-[#8A8275] mb-2">
-                          Your Name *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="Name or Organization"
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-sm font-sans text-cream placeholder:text-[#8A8275]/50 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent min-h-[44px] transition-colors"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block font-mono text-xs uppercase text-[#8A8275] mb-2">
-                          Email Address *
-                        </label>
-                        <input
-                          type="email"
-                          required
-                          placeholder="name@domain.com"
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-sm font-sans text-cream placeholder:text-[#8A8275]/50 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent min-h-[44px] transition-colors"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block font-mono text-xs uppercase text-[#8A8275] mb-2">
-                        Subject
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Software Engineering Inquiry / Project"
-                        value={formData.subject}
-                        onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-sm font-sans text-cream placeholder:text-[#8A8275]/50 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent min-h-[44px] transition-colors"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-mono text-xs uppercase text-[#8A8275] mb-2">
-                        Message *
-                      </label>
-                      <textarea
-                        rows={4}
-                        required
-                        placeholder="Describe your technical inquiry, project requirements, or opportunity..."
-                        value={formData.message}
-                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-sm font-sans text-cream placeholder:text-[#8A8275]/50 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent resize-none transition-colors"
-                      />
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-2">
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-accent text-white font-mono text-xs font-bold uppercase tracking-wider hover:bg-accent-light transition-all shadow-lg active:scale-95 disabled:opacity-50 cursor-pointer min-h-[44px]"
-                      >
-                        <Send className="w-3.5 h-3.5" />
-                        <span>{submitting ? 'DISPATCHING...' : 'DISPATCH MESSAGE'}</span>
-                      </button>
-
-                      <div className="flex items-center gap-3 text-xs font-mono text-[#8A8275]">
-                        <span>Or direct:</span>
-                        <a
-                          href={getGmailComposeUrl(formData.subject, formData.message)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-cream hover:text-accent transition-colors underline decoration-dotted"
-                          title="Open pre-filled draft in Gmail"
-                        >
-                          Gmail Web
-                        </a>
-                        <span>·</span>
-                        <a
-                          href={getMailtoUrl(formData.subject, formData.message)}
-                          className="text-cream hover:text-accent transition-colors underline decoration-dotted"
-                          title="Open in Mail app"
-                        >
-                          Mail Client
-                        </a>
-                      </div>
-                    </div>
-                  </form>
+                {/* Inline Success/Error Status Message */}
+                {status === 'success' && (
+                  <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2.5 text-xs font-mono text-emerald-400">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{statusMessage}</span>
+                  </div>
                 )}
-              </AnimatePresence>
+
+                {status === 'error' && (
+                  <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-2.5 text-xs font-mono text-rose-400">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{statusMessage}</span>
+                  </div>
+                )}
+
+                {/* Single Standard SEND MESSAGE button */}
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-accent text-white font-mono text-xs font-bold uppercase tracking-wider hover:bg-accent-light transition-all shadow-lg active:scale-95 disabled:opacity-50 cursor-pointer min-h-[44px]"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>{submitting ? 'SENDING...' : 'SEND MESSAGE'}</span>
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
 
