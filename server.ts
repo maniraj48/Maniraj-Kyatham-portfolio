@@ -112,13 +112,14 @@ async function startServer() {
       let responseNote = '';
 
       try {
+        const reqOrigin = (req.headers.origin as string) || (req.headers.referer as string) || 'https://maniraj-kyatham-portfolio.vercel.app';
         const formSubmitRes = await fetch(`https://formsubmit.co/ajax/${recipient}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'Referer': 'https://manirajkyatham.dev',
-            'Origin': 'https://manirajkyatham.dev'
+            'Referer': reqOrigin,
+            'Origin': reqOrigin
           },
           body: JSON.stringify({
             name: messageEntry.name,

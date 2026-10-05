@@ -75,7 +75,12 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
     sounds.playClick();
 
     const currentData = { ...formData };
+    const recipient = PERSONAL_INFO.email;
 
+    let resJson: any = null;
+    let reachedApi = false;
+
+    // 1. Try local or Vercel serverless /api/contact route
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
@@ -83,42 +88,85 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
         body: JSON.stringify(currentData)
       });
 
-      const resJson = await response.json();
-
-      if (response.ok && resJson.success) {
-        sounds.playSuccess();
-        setSubmissionData({
-          ...currentData,
-          needsActivation: resJson.needsActivation,
-          forwarded: resJson.forwarded,
-          note: resJson.note
-        });
-        setSubmitted(true);
-        setFormData({ name: '', email: '', subject: '', message: '' });
-
-        if (resJson.needsActivation) {
-          onShowToast('Message saved! Check your email for FormSubmit activation.', 'info');
-        } else {
-          onShowToast('Message dispatched directly to Maniraj!', 'success');
-        }
-      } else {
-        throw new Error(resJson.error || 'Failed to dispatch');
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        resJson = await response.json();
+        reachedApi = true;
       }
-    } catch (err: any) {
-      console.error('Contact dispatch error:', err);
+    } catch (apiErr) {
+      console.warn('API endpoint unreachable, trying direct browser gateway:', apiErr);
+    }
+
+    // 2. If /api/contact is unavailable (e.g. static CDN on Vercel), dispatch directly to FormSubmit from browser
+    if (!reachedApi || !resJson) {
+      try {
+        const formSubmitRes = await fetch(`https://formsubmit.co/ajax/${recipient}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            name: currentData.name,
+            email: currentData.email,
+            _replyto: currentData.email,
+            _subject: `[Portfolio Inquiry] ${currentData.subject || 'New Contact'} (from ${currentData.name})`,
+            subject: currentData.subject || 'Portfolio Inquiry',
+            message: currentData.message,
+            _template: 'table',
+            _captcha: 'false'
+          })
+        });
+
+        resJson = await formSubmitRes.json().catch(() => null);
+      } catch (directErr) {
+        console.error('Direct gateway error:', directErr);
+      }
+    }
+
+    // 3. Inspect results accurately
+    const isSuccess = resJson && (resJson.success === 'true' || resJson.success === true || resJson.forwarded === true);
+    const isActivationNeeded = resJson && (
+      resJson.needsActivation === true ||
+      (typeof resJson.message === 'string' && resJson.message.toLowerCase().includes('activation')) ||
+      (typeof resJson.note === 'string' && resJson.note.toLowerCase().includes('activation'))
+    );
+
+    if (isActivationNeeded) {
+      sounds.playSuccess();
+      setSubmissionData({
+        ...currentData,
+        needsActivation: true,
+        forwarded: false,
+        note: 'FormSubmit activation email pending confirmation'
+      });
+      setSubmitted(true);
+      setFormData({ name: '', email: '', subject: '', message: '' });
+      onShowToast('Action required: Please click "Activate Form" in your email inbox.', 'info');
+    } else if (isSuccess) {
+      sounds.playSuccess();
+      setSubmissionData({
+        ...currentData,
+        needsActivation: false,
+        forwarded: true,
+        note: 'Delivered directly to ' + recipient
+      });
+      setSubmitted(true);
+      setFormData({ name: '', email: '', subject: '', message: '' });
+      onShowToast('Message dispatched directly to Maniraj!', 'success');
+    } else {
       sounds.playError();
-      // Graceful fallback: Still allow them to send via Gmail / mailto immediately
       setSubmissionData({
         ...currentData,
         needsActivation: false,
         forwarded: false,
-        note: 'Saved locally, email client ready'
+        note: 'Gateway pending, direct email client ready'
       });
       setSubmitted(true);
-      onShowToast('Ready to send via your email client or Gmail!', 'info');
-    } finally {
-      setSubmitting(false);
+      onShowToast('Ready to send via Gmail or default mail app!', 'info');
     }
+
+    setSubmitting(false);
   };
 
   const handleResetForm = () => {
@@ -323,19 +371,49 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
                     transition={{ duration: 0.3 }}
                     className="space-y-6"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-                        <CheckCircle2 className="w-5 h-5" />
+                    {submissionData.forwarded && !submissionData.needsActivation ? (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                          <CheckCircle2 className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <span className="font-mono text-xs uppercase tracking-widest text-emerald-400 font-bold block">
+                            MESSAGE DELIVERED
+                          </span>
+                          <h3 className="font-display font-bold text-cream text-lg">
+                            Delivered to Maniraj's Inbox
+                          </h3>
+                        </div>
                       </div>
-                      <div>
-                        <span className="font-mono text-xs uppercase tracking-widest text-emerald-400 font-bold block">
-                          MESSAGE DISPATCHED
-                        </span>
-                        <h3 className="font-display font-bold text-cream text-lg">
-                          Transmission Logged & Routed
-                        </h3>
+                    ) : submissionData.needsActivation ? (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                          <Mail className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <span className="font-mono text-xs uppercase tracking-widest text-amber-400 font-bold block">
+                            1-TIME ACTIVATION REQUIRED
+                          </span>
+                          <h3 className="font-display font-bold text-cream text-lg">
+                            Confirmation Link Sent to Your Gmail
+                          </h3>
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/30 flex items-center justify-center text-accent shrink-0">
+                          <Mail className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <span className="font-mono text-xs uppercase tracking-widest text-accent font-bold block">
+                            DIRECT EMAIL READY
+                          </span>
+                          <h3 className="font-display font-bold text-cream text-lg">
+                            Send via 1-Click Gmail or Mail
+                          </h3>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-2 text-xs font-mono">
                       <div className="text-[#8A8275] flex items-center justify-between">
@@ -353,14 +431,23 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
                     </div>
 
                     {submissionData.needsActivation && (
-                      <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2 text-xs">
+                      <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2.5 text-xs">
                         <div className="flex items-center gap-2 text-amber-400 font-mono font-semibold">
-                          <span>📬 FormSubmit Email Activation Notice</span>
+                          <span>📬 Action Required at {PERSONAL_INFO.email}:</span>
                         </div>
-                        <p className="text-cream/90 text-xs font-sans leading-relaxed">
-                          A 1-time activation confirmation email was sent by FormSubmit to <strong className="text-cream">{PERSONAL_INFO.email}</strong>. 
-                          Once you click <em>"Activate Form"</em> in your Gmail inbox, FormSubmit will automatically push all future web submissions directly into your inbox.
-                        </p>
+                        <div className="text-cream/90 text-xs font-sans leading-relaxed space-y-1.5">
+                          <p>
+                            FormSubmit has sent a 1-time activation confirmation email to <strong className="text-cream">{PERSONAL_INFO.email}</strong>.
+                          </p>
+                          <ol className="list-decimal list-inside space-y-1 text-cream/90 font-medium pl-1">
+                            <li>Open your inbox at <strong className="text-accent">{PERSONAL_INFO.email}</strong></li>
+                            <li>Check for an email from <em>FormSubmit</em> (check Spam/Promotions if not in Primary)</li>
+                            <li>Click the <strong>"Activate Form"</strong> button inside that email</li>
+                          </ol>
+                          <p className="text-[#9E988F] text-[11px] pt-1">
+                            Once activated, all future messages submitted through your portfolio will be pushed straight into your Gmail inbox!
+                          </p>
+                        </div>
                       </div>
                     )}
 
