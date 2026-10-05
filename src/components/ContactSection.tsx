@@ -123,7 +123,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
         sounds.playSuccess();
         setStatus('success');
         setStatusMessage('✓ Message sent successfully.');
-        onShowToast('✓ Message sent successfully.', 'success');
         setFormData({ name: '', email: '', subject: '', message: '' });
       } else {
         throw new Error(resData?.message || 'Submission failed');
@@ -132,7 +131,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
       sounds.playError();
       setStatus('error');
       setStatusMessage('Unable to send your message. Please try again.');
-      onShowToast('Unable to send your message. Please try again.', 'error');
     } finally {
       setSubmitting(false);
     }
