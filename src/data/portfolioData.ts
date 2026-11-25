@@ -219,6 +219,28 @@ def query_knowledge_vault():
 
 export const EXPERIENCES: Experience[] = [
   {
+    id: 'exp-infosys',
+    role: 'AI Intern',
+    company: 'Infosys Springboard',
+    program: 'Internship Program 7.0',
+    period: 'August 14, 2026 – October 20, 2026',
+    type: 'Internship',
+    location: 'Remote',
+    description:
+      'Completed AI/ML internship focused on developing YieldSense AI, an AI-powered crop yield prediction platform with FastAPI backend integration.',
+    responsibilities: [
+      'AI/ML development and implementation across end-to-end project workflows.',
+      'Developed YieldSense AI, an AI-powered crop yield prediction platform.',
+      'Built and evaluated machine learning models for crop yield prediction.',
+      'Developed backend services and API integrations using FastAPI.',
+      'Worked with agricultural, weather, and soil-related data.',
+      'Integrated machine learning functionality with the application.',
+      'Tested, debugged, and improved application functionality.',
+      'Completed project documentation and implementation.'
+    ],
+    techStack: ['Python', 'FastAPI', 'Machine Learning', 'REST APIs']
+  },
+  {
     id: 'exp-edunet',
     role: 'AI & Data Analytics Intern',
     company: 'Edunet Foundation (AICTE & Shell India)',
