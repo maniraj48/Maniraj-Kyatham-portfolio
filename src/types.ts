@@ -36,9 +36,11 @@ export interface Experience {
   id: string;
   role: string;
   company: string;
+  program?: string;
   period: string;
-  location: string;
+  location?: string;
   type: string;
+  status?: string;
   description: string;
   responsibilities: string[];
   techStack: string[];
