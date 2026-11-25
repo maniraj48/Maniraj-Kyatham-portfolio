@@ -45,15 +45,27 @@ export const Experience: React.FC = () => {
               {/* Timeline Entry Header */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/10">
                 <div>
-                  <div className="flex items-center gap-3 mb-1.5">
+                  <div className="flex flex-wrap items-center gap-3 mb-1.5">
                     <span className="font-mono text-xs text-accent font-bold uppercase tracking-widest">
                       {exp.type}
                     </span>
-                    <span className="text-[#8A8275]">·</span>
-                    <span className="font-mono text-xs text-[#8A8275] flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-accent" />
-                      <span>{exp.location}</span>
-                    </span>
+                    {exp.location && (
+                      <>
+                        <span className="text-[#8A8275]">·</span>
+                        <span className="font-mono text-xs text-[#8A8275] flex items-center gap-1">
+                          <MapPin className="w-3.5 h-3.5 text-accent" />
+                          <span>{exp.location}</span>
+                        </span>
+                      </>
+                    )}
+                    {exp.status && (
+                      <>
+                        <span className="text-[#8A8275]">·</span>
+                        <span className="font-mono text-xs text-[#8A8275] uppercase tracking-wider">
+                          {exp.status}
+                        </span>
+                      </>
+                    )}
                   </div>
 
                   <h3 className="text-2xl sm:text-3xl font-display font-black text-cream uppercase tracking-tight">
@@ -62,10 +74,11 @@ export const Experience: React.FC = () => {
 
                   <p className="mt-1 font-mono text-xs sm:text-sm text-[#9E988F]">
                     {exp.company}
+                    {exp.program && <span className="text-[#8A8275]"> · {exp.program}</span>}
                   </p>
                 </div>
 
-                <div className="font-mono text-xs text-accent font-semibold px-4 py-2 rounded-full bg-accent/10 border border-accent/20 w-fit">
+                <div className="font-mono text-xs text-accent font-semibold px-4 py-2 rounded-full bg-accent/10 border border-accent/20 w-fit shrink-0">
                   {exp.period}
                 </div>
               </div>
